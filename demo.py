@@ -44,7 +44,7 @@ while (True):
     cv2.putText(result, "Total: " + str(count), (10, 45), font, 0.5, (240, 240, 240), 1, line)
     # show frames
     cv2.imshow('frame', result)
-    if cv2.waitKey(1) &amp; 0xFF == ord('q'):
+    if cv2.waitKey(1) & 0xFF == ord('q'):
         break
  
 # When everything done, release the capture
