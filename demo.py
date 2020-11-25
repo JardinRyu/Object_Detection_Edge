@@ -17,9 +17,8 @@ record = False
 capture = cv2.VideoCapture(0)
 if (capture.isOpened() == False):
     print("NO CAMERA!")
-capture.set(cv2.CAP_PROP_FRAME_WIDTH, CAMERA_WIDTH)
-capture.set(cv2.CAP_PROP_FRAME_HEIGHT, CAMERA_HEIGHT)
-capture.set(cv2.CAP_PROP_FPS, 30)
+capture.set(3,CAMERA_WIDTH)
+capture.set(4,CAMERA_HEIGHT)
 
 while (True):
     ret, frame = capture.read()
@@ -34,7 +33,7 @@ while (True):
  
     detections = net.Detect(input_image, w, h)
     count = len(detections)
-    print("detected {:d} objects in image".format(len(detections)))
+    #print("detected {:d} objects in image".format(len(detections)))
     for detection in detections:
         print(detection)
  
