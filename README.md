@@ -1,2 +1,2 @@
-# Object_Detection_JetsonNano
-Object Detection on Jetsonn Nano
+# Object_Detection_Edge
+Object Detection on Jetsonn Nano & Coral Dev Board
