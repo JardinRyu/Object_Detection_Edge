@@ -45,9 +45,12 @@ def get_output(interpreter, score_threshold, top_k, image_scale=1.0):
     return [make(i) for i in range(top_k) if scores[i] >= score_threshold]
 
 def main():
+    # Directory / Model / Label 설정
     default_model_dir = '../all_models'
     default_model = 'mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite'
     default_labels = 'coco_labels.txt'
+    
+    #변수 입력
     parser = argparse.ArgumentParser()
     parser.add_argument('--model', help='.tflite model path',
                         default=os.path.join(default_model_dir,default_model))
@@ -60,42 +63,54 @@ def main():
                         help='classifier score threshold')
     args = parser.parse_args()
 
+    # Detection Model setup
     print('Loading {} with {} labels.'.format(args.model, args.labels))
     interpreter = common.make_interpreter(args.model)
     interpreter.allocate_tensors()
     labels = load_labels(args.labels)
 
+    #화면녹화 설정
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     record_org = False
     record = False
 
+    #camera 입력 default = /dev/video1
     cap = cv2.VideoCapture(args.camera_idx)
 
     while cap.isOpened():
+        #frame 받기, ret : camera 상태값
         ret, image = cap.read()
         if not ret:
             break
+        #원본 이미지와 감지 이미지 분리 
         frame =  cv2.resize(image, (0, 0), fx=1, fy=1)
         cv2_im = frame
 
+        #이미지를 모델 input값으로 변환
         cv2_im_rgb = cv2.cvtColor(cv2_im, cv2.COLOR_BGR2RGB)
         pil_im = Image.fromarray(cv2_im_rgb)
         starttime = time.time()
 
+        # 모델 추론
         common.set_input(interpreter, pil_im)
         interpreter.invoke()
         objs = get_output(interpreter, score_threshold=args.threshold, top_k=args.top_k)
+        #이미지에 감지 객체 표시
         cv2_im = append_objs_to_img(cv2_im, objs, labels)
         elapsed_ms = (time.time() - starttime)
 
+        # fps 계산 / 출력
         if elapsed_ms != 0:
             fps = 1 / (elapsed_ms)
             str = 'FPS: %0.1f' % fps
             cv2.putText(frame, str, (5, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 3)    
 
+        # 영상 출력
         cv2.imshow('frame', cv2_im)
 
+        # 저장파일명 설정 (날짜, 시간)
         now = datetime.datetime.now().strftime("%d_%H-%M-%S")
+        # 키 입력
         k = cv2.waitKey(1) & 0xff
 
         #Stop
